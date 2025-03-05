@@ -24,12 +24,10 @@ class StaffResource extends Resource
             ->schema([
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name'),
-                Forms\Components\DatePicker::make('date_of_birth')
+                Forms\Components\DatePicker::make('date_of_birth'),
+                Forms\Components\TextInput::make('staffno')
                     ->required(),
-                Forms\Components\TextInput::make('staffid')
-                    ->required(),
-                Forms\Components\DatePicker::make('join_date')
-                    ->required(),
+                Forms\Components\DatePicker::make('join_date'),
                 Forms\Components\DatePicker::make('end_date'),
             ]);
     }
@@ -44,7 +42,7 @@ class StaffResource extends Resource
                 Tables\Columns\TextColumn::make('date_of_birth')
                     ->date()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('staffid')
+                Tables\Columns\TextColumn::make('staffno')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('join_date')
                     ->date()

@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\PageCategoryEnum;
 use App\Filament\Resources\ServiceMenuResource\Pages;
 use App\Models\ServiceMenu;
 use Filament\Forms;
-use \App\Enums\PageCategoryEnum;
-use Filament\Forms\Components\Split;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Fieldset;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Split;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Route;
 
 class ServiceMenuResource extends Resource
 {
@@ -35,7 +35,9 @@ class ServiceMenuResource extends Resource
                                 ->options(PageCategoryEnum::class)
                                 ->required(),
                             Forms\Components\FileUpload::make('image')
-                                ->image(),
+                                ->image()
+                                ->disk('public') // Specify the disk
+                                ->directory('menu'), // Specify the directory
                         ])->grow(false),
                     Section::make('Details')
                         ->schema([
@@ -55,20 +57,45 @@ class ServiceMenuResource extends Resource
                         Forms\Components\Select::make('domain_id')
                             ->label('Domain')
                             ->relationship('domain', 'system') // Use the relationship to get the domain name
-                            ->required(),
-                        Forms\Components\TextInput::make('path'),
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state == 1) {
+                                    $set('path', null);
+                                }
+                            }),
+                        Forms\Components\TextInput::make('path')
+                            ->label('Path')
+                            ->visible(fn ($get) => $get('domain_id') != 1),
+                        Forms\Components\Select::make('path')
+                            ->label('Path')
+                            ->options(self::getRouteOptions())
+                            ->visible(fn ($get) => $get('domain_id') == 1),
                         Forms\Components\TextInput::make('param'),
                     ])->columns(3),
             ]);
+    }
+
+    protected static function getRouteOptions(): array
+    {
+        $routes = Route::getRoutes();
+        $options = [];
+
+        foreach ($routes as $route) {
+            $name = $route->getName();
+            $uri = $route->uri();
+            if ($name !== null && str_starts_with($name, 'filament.staff') && !str_contains($uri, '{')) {
+                $options[$uri] = $uri;
+            }
+        }
+
+        return $options;
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-
-                //Tables\Columns\TextColumn::make('category')
-                //    ->searchable(),
                 Tables\Columns\ImageColumn::make('image'),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
@@ -87,7 +114,10 @@ class ServiceMenuResource extends Resource
                 Tables\Columns\TextColumn::make('parent_id')
                     ->numeric()
                     ->sortable(),
-
+            ])
+            ->headerActions([
+                Tables\Actions\ExportAction::make()
+                    ->exporter(\App\Filament\Exports\ServiceMenuExporter::class),
             ])
             ->filters([
                 //

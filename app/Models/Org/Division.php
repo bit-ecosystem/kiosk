@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Division extends Model
 {
     use HasFactory;
+
     protected $table = 'org_divisions';
+
     protected $fillable = [
         'name', 'description',
     ];

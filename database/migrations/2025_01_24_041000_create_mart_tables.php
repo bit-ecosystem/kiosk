@@ -36,6 +36,7 @@ return new class extends Migration
 
         Schema::create('mart_assets', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->foreignId('asset_type_id')->constrained('mart_asset_types')->onDelete('cascade');
             $table->string('description');
             $table->integer('quantity_available');
@@ -44,7 +45,7 @@ return new class extends Migration
 
         Schema::create('mart_asset_types', function (Blueprint $table) {
             $table->id();
-            $table->string('asset_type_name');
+            $table->string('name');
             $table->timestamps();
         });
     }

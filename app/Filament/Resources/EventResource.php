@@ -5,9 +5,9 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\EventResource\Pages;
 use App\Models\Event;
 use Filament\Forms;
+use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\Fieldset;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -27,14 +27,13 @@ class EventResource extends Resource
                     ->required(),
                 Forms\Components\Textarea::make('description')
                     ->columnSpanFull(),
-                    Fieldset::make('URL')
+                Fieldset::make('URL')
                     ->schema([
                         Forms\Components\DateTimePicker::make('start')
-                        ->required(),
+                            ->required(),
                         Forms\Components\DateTimePicker::make('end'),
                         Forms\Components\Toggle::make('all_day'),
                     ])->columns(3),
-
 
                 Forms\Components\TextInput::make('url'),
                 Forms\Components\ColorPicker::make('color'),

@@ -6,12 +6,14 @@ namespace App\Models;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -84,6 +86,16 @@ class User extends Authenticatable
                 $user->password = Hash::make('P@ssword');
             }
         });
+        static::created(function ($user) {
+            // Find the role based on user_type_id
+            $roleNamePrefix = 'ut' . $user->user_type_id . '-';
+            $role = Role::where('name', 'like', $roleNamePrefix . '%')->first();
+
+            if ($role) {
+                // Assign the role to the user
+                $user->assignRole($role->name);
+            }
+        });
     }
 
     public function userType()
@@ -104,5 +116,9 @@ class User extends Authenticatable
     public function groups()
     {
         return $this->belongsToMany(Group::class);
+    }
+    public function staff(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }

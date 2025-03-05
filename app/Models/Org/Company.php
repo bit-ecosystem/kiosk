@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Company extends Model
 {
     use HasFactory;
+
     protected $table = 'org_companies';
+
     protected $fillable = [
         'name', 'description',
     ];

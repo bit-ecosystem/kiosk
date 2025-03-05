@@ -15,6 +15,17 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call([
             JsonDBSeeder::class,
-            RolesAndPermissionsSeeder::class ]);
+            RolesAndPermissionsSeeder::class
+        ]);
+        User::factory()->withSpecificUserTypeId(1)->create();
+        User::factory()->withSpecificUserTypeId(2)->create();
+        User::factory()->withSpecificUserTypeId(3)->create();
+        User::factory()->withSpecificUserTypeId(4)->create();
+        User::factory()->withSpecificUserTypeId(5)->create();
+        User::factory()->withSpecificUserTypeId(6)->create();
+        User::factory()->withSpecificUserTypeId(7)->create();
+        User::factory()->withSpecificUserTypeId(8)->create();
+        User::factory()->withSpecificUserTypeId(12)->create();
+        User::factory(50)->create();
     }
 }

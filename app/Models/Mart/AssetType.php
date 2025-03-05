@@ -9,7 +9,7 @@ class AssetType extends Model
     protected $table = 'mart_asset_types';
 
     protected $fillable = [
-        'asset_type_name',
+        'name',
     ];
 
     public function assets()

@@ -23,7 +23,6 @@ class ServiceMenu extends Model
         'category' => PageCategoryEnum::class,
     ];
 
-
     public static function create(array $attributes = [])
     {
         if (empty($attributes['parent_id'])) {
@@ -53,20 +52,20 @@ class ServiceMenu extends Model
     public function getUrlAttribute()
     {
         if ($this->domain_id == 1) {
-            return $this->param ? $this->path . '.' . $this->param : $this->path;
+            return $this->param ? $this->path.'.'.$this->param : $this->path;
         }
 
         $domain = $this->domain ? $this->domain->domain : '';
-        $param = $this->param ? '?' . $this->param : '';
+        $param = $this->param ? '?'.$this->param : '';
 
-        return $domain . '/' . $this->path . $param;
+        return $domain.'/'.$this->path.$param;
     }
 
     // Mutator to set the domain, path, and param fields from a full URL
     public function setUrlAttribute($value)
     {
         $parsedUrl = parse_url($value);
-        $domain = Domain::firstOrCreate(['domain' => $parsedUrl['scheme'] . '://' . $parsedUrl['host']]);
+        $domain = Domain::firstOrCreate(['domain' => $parsedUrl['scheme'].'://'.$parsedUrl['host']]);
         $this->attributes['domain_id'] = $domain->id;
         $this->attributes['path'] = ltrim($parsedUrl['path'], '/');
         $this->attributes['param'] = isset($parsedUrl['query']) ? $parsedUrl['query'] : null;

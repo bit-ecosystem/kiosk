@@ -9,6 +9,7 @@ class Asset extends Model
     protected $table = 'mart_assets';
 
     protected $fillable = [
+        'name',
         'asset_type_id',
         'description',
         'quantity_available',

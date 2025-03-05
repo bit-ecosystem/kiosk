@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('org_staff', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade'); // Foreign key to users table
-            $table->date('date_of_birth');
-            $table->string('staffid');
-            $table->date('join_date');
+            $table->date('date_of_birth')->nullable();
+            $table->string('staffno');
+            $table->date('join_date')->nullable();
             $table->date('end_date')->nullable();
             $table->timestamps();
         });

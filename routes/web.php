@@ -10,7 +10,7 @@ Route::get('/', function () {
 Route::get('auth/redirect', [LoginController::class, 'redirectToProvider']);
 Route::get('auth/callback', [LoginController::class, 'handleProviderCallback']);
 
-//route::post('staff/logout',Filament\Http\Controllers\Auth\LogoutController::class)
+// route::post('staff/logout',Filament\Http\Controllers\Auth\LogoutController::class)
 // Route::post('staff/logout', function () {
 //     // Redirect to home page
 //     return redirect('/');

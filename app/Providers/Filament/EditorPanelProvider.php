@@ -10,22 +10,23 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
+use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 
 class EditorPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $panel = $panel
+        return $panel
             ->id('editor')
-            ->homeUrl('/')
             ->path('editor')
+            ->homeUrl('/')
             ->colors([
                 'primary' => Color::Fuchsia,
             ])
@@ -37,7 +38,11 @@ class EditorPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Editor/Widgets'), for: 'App\\Filament\\Editor\\Widgets')
             ->widgets([
                 \App\Filament\Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                \App\Filament\Widgets\CalendarWidget::class,
+            ])
+            ->plugins([
+                FilamentApexChartsPlugin::make(),
+                FilamentFullCalendarPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -53,26 +58,5 @@ class EditorPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
-
-        // Discover additional resources, pages, and widgets in Modules
-        $modulePaths = glob(app_path('Modules/*/App/Filament/Editor/Resources'), GLOB_ONLYDIR);
-        foreach ($modulePaths as $path) {
-            $namespace = 'App\\' . str_replace('/', '\\', str_replace(app_path() . '/', '', $path));
-            $panel->discoverResources(in: $path, for: $namespace);
-        }
-
-        $modulePaths = glob(app_path('Modules/*/App/Filament/Editor/Pages'), GLOB_ONLYDIR);
-        foreach ($modulePaths as $path) {
-            $namespace = 'App\\' . str_replace('/', '\\', str_replace(app_path() . '/', '', $path));
-            $panel->discoverPages(in: $path, for: $namespace);
-        }
-
-        $modulePaths = glob(app_path('Modules/*/App/Filament/Editor/Widgets'), GLOB_ONLYDIR);
-        foreach ($modulePaths as $path) {
-            $namespace = 'App\\' . str_replace('/', '\\', str_replace(app_path() . '/', '', $path));
-            $panel->discoverWidgets(in: $path, for: $namespace);
-        }
-
-        return $panel;
     }
 }

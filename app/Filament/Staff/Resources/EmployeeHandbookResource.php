@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 class EmployeeHandbookResource extends Resource
 {
     protected static ?string $navigationGroup = 'Editor';
+
     protected static ?string $model = EmployeeHandbook::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

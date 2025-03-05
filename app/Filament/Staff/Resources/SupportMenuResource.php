@@ -9,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
-
+use App\Filament\Traits\MenuUrlTrait;
 class SupportMenuResource extends Resource
 {
     protected static ?string $model = ServiceMenu::class;
@@ -31,30 +31,32 @@ class SupportMenuResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->query(function () {
-                $parentId = request()->route('record');
-
-                return ServiceMenu::query()
-                    ->when($parentId, function ($query, $parentId) {
-                        // If parentId is present, filter by parent_id
-                        return $query->where('parent_id', $parentId);
-                    }, function ($query) {
-                        // If parentId is not present, filter by category 'Support'
-                        return $query->whereNull('parent_id')
-                            ->Where('category', 'Support');
-                    });
+        ->query(function () {
+            $parentId = request()->route('record');
+            return MenuUrlTrait::getMenuQuery($parentId, 'Support');
             })->columns([
                 Tables\Columns\Layout\Stack::make([
                     Tables\Columns\ImageColumn::make('image')
                         ->height('50%')
-                        ->width('50%'),
-
+                        ->width('50%')
+                        ->url(function ($record) {
+                            return MenuUrlTrait::getMenuUrl($record);
+                        })
+                        ->openUrlInNewTab(function ($record) {
+                            return MenuUrlTrait::ShouldOpenInNewTab($record);
+                        }),
                     //  Tables\Columns\Layout\Stack::make([
                     Tables\Columns\TextColumn::make('title')
                         ->weight('bold')
                         ->extraAttributes([
                             'style' => 'text-align: center;',
-                        ]),
+                        ])
+                        ->url(function ($record) {
+                            return MenuUrlTrait::getMenuUrl($record);
+                        })
+                        ->openUrlInNewTab(function ($record) {
+                            return MenuUrlTrait::ShouldOpenInNewTab($record);
+                        }),
                     //    ),
                 ])->space(3)
                     ->alignment('center')
@@ -73,19 +75,6 @@ class SupportMenuResource extends Resource
                 'xl' => 4,
             ])
             ->actions([
-                Action::make('view')
-                    ->label('')
-                    ->url(function ($record) {
-                        if ($record->children->isEmpty()) {
-                            if (str_starts_with($record->url, 'http')) {
-                                return $record->url;
-                            } else {
-                                return rtrim(config('app.url'), '/').'/'.ltrim($record->url, '/');
-                            }
-                        } else {
-                            return route('filament.staff.resources.service-catalogs.index', $record);
-                        }
-                    }),
             ]);
     }
 

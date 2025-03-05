@@ -9,9 +9,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
-
+use App\Filament\Traits\MenuUrlTrait;
 class ServiceMenuResource extends Resource
 {
+    // use MenuUrlTrait;
+    protected static ?string $recordTitleAttribute = 'title';
     protected static ?string $model = ServiceMenu::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-cursor-arrow-ripple';
@@ -24,7 +26,9 @@ class ServiceMenuResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Tables\Columns\TextColumn::make('title')
+                    ->searchable()
+                    ->sortable(),
             ]);
     }
 
@@ -33,40 +37,42 @@ class ServiceMenuResource extends Resource
         return $table
             ->query(function () {
                 $parentId = request()->route('record');
-
-                return ServiceMenu::query()
-                    ->when($parentId, function ($query, $parentId) {
-                        // If parentId is present, filter by parent_id
-                        return $query->where('parent_id', $parentId);
-                    }, function ($query) {
-                        // If parentId is not present, filter by category 'Staff Self Service'
-                        return $query->whereNull('parent_id')
-                            ->where('category', 'Staff Self Service');
-                    });
+                return MenuUrlTrait::getMenuQuery($parentId, 'Staff Self Service');
             })->columns([
-                Tables\Columns\Layout\Stack::make([
-                    Tables\Columns\ImageColumn::make('image')
-                        ->height('50%')
-                        ->width('50%')
-                        ->extraAttributes([
-                            'style' => 'display: flex; justify-content: center; align-items: center;']),
-
-                    //  Tables\Columns\Layout\Stack::make([
-                    Tables\Columns\TextColumn::make('title')
-                        ->weight('bold')
-                        ->extraAttributes([
-                            'style' => 'text-align: center;',
-                        ]),
-                    //    ),
-                ])->space(3)
-                    ->alignment('center')
-                    ->extraAttributes(function ($record) {
-                        return [
-                            'title' => "{$record->description}", // Tooltip content
-                            'style' => "background-color: {$record->color}; padding: 5px; border-radius: 5px;",
-                        ];
-                    }),
-            ])
+                    Tables\Columns\Layout\Stack::make([
+                        Tables\Columns\ImageColumn::make('image')
+                            ->height('50%')
+                            ->width('50%')
+                            ->extraAttributes([
+                                'style' => 'display: flex; justify-content: center; align-items: center;'
+                            ])
+                            ->url(function ($record) {
+                                return MenuUrlTrait::getMenuUrl($record);
+                            })
+                            ->openUrlInNewTab(function ($record) {
+                                return MenuUrlTrait::ShouldOpenInNewTab($record);
+                            }),
+                        Tables\Columns\TextColumn::make('title')
+                            ->weight('bold')
+                            ->searchable()
+                            ->extraAttributes([
+                                'style' => 'text-align: center;',
+                            ])
+                            ->url(function ($record) {
+                                return MenuUrlTrait::getMenuUrl($record);
+                            })
+                            ->openUrlInNewTab(function ($record) {
+                                return MenuUrlTrait::ShouldOpenInNewTab($record);
+                            }),
+                    ])->space(3)
+                        ->alignment('center')
+                        ->extraAttributes(function ($record) {
+                            return [
+                                'title' => "{$record->description}", // Tooltip content
+                                'style' => "background-color: {$record->color}; padding: 5px; border-radius: 5px;",
+                            ];
+                        }),
+                ])
             ->filters([
                 // Add filters if needed
             ])
@@ -76,19 +82,6 @@ class ServiceMenuResource extends Resource
             ])
             ->paginated(false)
             ->actions([
-                Action::make('view')
-                    ->label('')
-                    ->url(function ($record) {
-                        if ($record->children->isEmpty()) {
-                            if (str_starts_with($record->url, 'http')) {
-                                return $record->url;
-                            } else {
-                                return rtrim(config('app.url'), '/').'/'.ltrim($record->url, '/');
-                            }
-                        } else {
-                            return route('filament.staff.resources.service-menus.index', $record);
-                        }
-                    }),
             ]);
     }
 

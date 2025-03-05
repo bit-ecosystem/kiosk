@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Group;
+use App\Models\Org\Staff;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -14,7 +15,7 @@ class LoginController extends Controller
 {
     public function redirectToProvider()
     {
-        Log::info('Using realm: '.config('services.keycloak.realm'));
+        Log::info('Using realm: ' . config('services.keycloak.realm'));
 
         return Socialite::driver('keycloak')->redirect();
     }
@@ -24,10 +25,29 @@ class LoginController extends Controller
         $user = Socialite::driver('keycloak')->user();
 
         $userJson = json_encode($user);
-        //dump($user);
+     //   dd($user);
+
+        // Extract the value after 'CN='
+        $manager = $user->user['Manager'];
+        if (preg_match('/CN=([^,]+)/', $manager, $matches)) {
+            $reportsTo = $matches[1];
+        } else {
+            $reportsTo = null; // Default to null if 'CN=' is not found
+        }
+//dd($user);
         // Store user data in session
         session(['keycloak_user' => $userJson]);
+        session(['cu.name' => $user['name'] ?? null]);
+        session(['cu.email' => $user['email'] ?? null]);
+        session(['cu.staffno' => $user->user['preferred_username'] ?? null]);
+        session(['cu.department' => $user->user['department'] ?? null]);
+        session(['cu.group' => $user->user['roles']['user_group'] ?? null]);
+        session(['cu.realm' => $user->user['roles']['realm'] ?? null]);
+        session(['cu.client' => $user->user['roles']['client'] ?? null]);
+        session(['cu.jobtitle' => $user->user['job_title'] ?? null]);
+        session(['cu.reportsTo' => $reportsTo]);
 
+    //    dd(session('cu'));
         $authUser = User::firstOrCreate([
             'email' => $user->email,
         ], [
@@ -37,39 +57,45 @@ class LoginController extends Controller
 
         Auth::login($authUser, true);
 
-        if (! empty($user->user['user_groups'])) {
+        if (!empty($user->user['roles']['user_group'])) {
             $userGroups = array_map(function ($group) {
                 return str_replace('/', 'ug_', $group);
-            }, $user->user['user_groups']);
+            }, $user->user['roles']['user_group']);
 
             $realmRoles = [];
-            if (! empty($user->user['realm_access']['roles'])) {
+            if (!empty($user->user['roles']['realm'])) {
                 $realmRoles = array_map(function ($role) {
-                    return 'rr_'.$role;
-                }, $user->user['realm_access']['roles']);
+                    return 'rr_' . $role;
+                }, $user->user['roles']['realm']);
             }
 
-            $resourceRoles = [];
-            if (! empty($user->user['resource_access'])) {
-                foreach ($user->user['resource_access'] as $resource => $access) {
-                    if (! empty($access['roles'])) {
-                        $resourceRoles = array_merge($resourceRoles, array_map(function ($role) use ($resource) {
-                            return 'ra_'.$resource.'_'.$role;
-                        }, $access['roles']));
-                    }
-                }
+            $ClientAppRoles = [];
+            if (!empty($user->user['roles']['client'])) {
+                $ClientAppRoles = array_map(function ($role) {
+                    return 'rc_' . $role;
+                }, $user->user['roles']['client']);
             }
 
-            $allGroups = array_merge($userGroups, $realmRoles, $resourceRoles);
+            $allGroups = array_merge($userGroups, $realmRoles, $ClientAppRoles);
 
             $this->syncGroups($authUser, $allGroups);
         }
-
+        //dd($user->user['preferred_username']);
+        // if (!empty($user->user['preferred_username'])) {
+        //     $staffno = $user->user['preferred_username'];
+        //     // Directly update or create the Staff entry
+        //     $staff = Staff::updateOrCreate(
+        //         ['staffno' => $staffno], // Condition to check
+        //         [
+        //             'staffno' => $staffno, // Ensure staffno is included in the attributes
+        //             'user_id' => $authUser->id // Values to update or create
+        //         ]
+        //     );
+        // }
         $homeUrl = $authUser->userType->home ?? '/';
 
         return redirect()->intended($homeUrl);
     }
-
     private function syncGroups(User $authUser, array $groups)
     {
         $groupIds = [];

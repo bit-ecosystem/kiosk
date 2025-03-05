@@ -15,7 +15,7 @@ use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
-
+use App\Filament\Traits\MenuUrlTrait;
 class HelpdeskResource extends Resource
 {
     protected static ?string $model = ServiceMenu::class;
@@ -78,11 +78,23 @@ class HelpdeskResource extends Resource
             ->columns([
                 Tables\Columns\Layout\Stack::make([
                     Tables\Columns\ImageColumn::make('image')
-                        ->height('100%')
-                        ->width('100%'),
+                        ->height('50%')
+                        ->width('50%')
+                        ->url(function ($record) {
+                            return MenuUrlTrait::getMenuUrl($record);
+                        })
+                        ->openUrlInNewTab(function ($record) {
+                            return MenuUrlTrait::ShouldOpenInNewTab($record);
+                        }),
                     Tables\Columns\Layout\Stack::make([
                         Tables\Columns\TextColumn::make('title')
-                            ->weight(FontWeight::Bold),
+                            ->weight(FontWeight::Bold)
+                            ->url(function ($record) {
+                                return MenuUrlTrait::getMenuUrl($record);
+                            })
+                            ->openUrlInNewTab(function ($record) {
+                                return MenuUrlTrait::ShouldOpenInNewTab($record);
+                            }),
 
                     ]),
                 ])->space(3)
@@ -103,9 +115,6 @@ class HelpdeskResource extends Resource
                 'xl' => 4,
             ])
             ->actions([
-                Action::make('view')
-                    ->label(''),
-
             ]);
 
     }

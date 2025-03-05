@@ -38,15 +38,15 @@
         }
     </style>
 
-    <div class="px-4 py-6">
+    <div class="px-4 py-6 text-xs">
         @if (!empty($handbook['sections']))
             @foreach ($handbook['sections'] as $section)
-                <h1 class="text-2xl font-bold">{{ $section['title'] }}</h1>
+                <h1 class="text-xl font-bold">{{ $section['title'] }}</h1>
                 <div class="p-4">
                     @if (!empty($section['subsections']))
                         @foreach ($section['subsections'] as $subsection)
                             <div class="p-1">
-                                <h2 class="text-xl font-semibold">{{ $subsection['title'] }}</h2>
+                                <h2 class="text-lg font-semibold">{{ $subsection['title'] }}</h2>
                                 <p class="indent-1">{{ $subsection['content'] }}</p>
                                 @if (!empty($subsection['app']))
                                     <div class="pdf-container text-right">

@@ -6,7 +6,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\MenuItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -28,6 +27,7 @@ class StaffPanelProvider extends PanelProvider
             ->id('staff')
             ->path('staff')
             ->homeUrl('/')
+            //->globalSearch(true)
             ->colors([
                 'primary' => Color::Cyan,
             ])
@@ -42,7 +42,6 @@ class StaffPanelProvider extends PanelProvider
                 \App\Filament\Widgets\CalendarWidget::class,
             ])
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
                 FilamentApexChartsPlugin::make(),
                 FilamentFullCalendarPlugin::make(),
             ])

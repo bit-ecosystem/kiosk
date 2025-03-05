@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasLabel;
+
 enum PageCategoryEnum: string implements HasLabel
 {
     case sss = 'Staff Self Service';
